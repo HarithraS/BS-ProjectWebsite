@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Column</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .req {
+            color: brown;
+        }
+
+        .content {
+            width: 400px;
+            max-width: 90%;
+            margin: 0 auto;
+            background: #b9eaac;
+            padding: 2em;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #image {
+            margin-left: 100px;
+        }
+
+        .back-button button {
+            margin-right: 60em;
+            margin-top: 6em;
+            width: 60px;
+            height: auto;
+            display: inline-block;
+            background-color: rgb(207, 203, 203);
+        }
+
+
+        @media screen and (max-width:430px) {
+            .content {
+                width: 370px;
+                max-width: 90%;
+                margin: 2em auto;
+                /* text-align: left; */
+                background: #b9eaac;
+                margin-left: 50px;
+                padding: 30px;
+                border-radius: 12px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .back-button button {
+                margin: 1em auto;
+                margin-right: 340px;
+            }
+
+            #image {
+                margin-right: 0px;
+            }
+
+            .content h2 {
+                font-size: 30px;
+            }
+
+            .topic {
+                margin-left: 100px;
+                padding-top: 5em;
+            }
+
+            .labels {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body style="background-color:rgb(231, 236, 223);">
+    <div class="topic">
+        <center>
+            <div class="back-button">
+                <a href="/profile">
+                    <button>Back</button>
+                </a>
+            </div>
+        </center>
+    </div>
+
+    <center style="padding-top:3em;">
+        <div class="content">
+            <h2>Add Your Content</h2><br>
+            <form action="/conform" method="post" enctype="multipart/form-data">
+                <div class="labels">
+                    <input type="hidden" name="email" value="{{ email }}">
+                    <input type="hidden" name="name" value="{{ name }}">
+
+                    <label>Image or Video Description:<span class="req">*</span></label><br><br>
+                    <input type="text" name="thought" minlength="5" maxlength="50" required><br><br>
+                    <label>Upload picture/video:</label><br><br>
+                    <input type="file" style="margin-right:20px;" accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.txt"
+                        id="image" name="file" required><br><br>
+                    <button type="submit">Update</button>
+                </div>
+
+            </form>
+        </div>
+
+
+    </center>
+</body>
+
+</html>
+
+
+
+<!-- <script>
+        function validateForm() {
+            let image = document.getElementById("image").files.length;
+            let video = document.getElementById("video").files.length;
+
+            if (image === 0 && video === 0) {
+                alert("Please upload either an image or a video.");
+                return false;
+            }
+            if (image > 0 && video > 0) {
+                alert("Please upload only one: either an image OR a video (not both).");
+                return false;
+            }
+            return true;
+        }
+    </script> -->

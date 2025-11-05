@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .content {
+        width: 400px;
+        max-width: 90%;
+        margin: 0 auto;
+        /* text-align: left; */
+        background: #b9eaac;
+        padding: 4em;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .note {
+        background-color: rgb(255, 255, 255);
+        color: red;
+        border-radius: 10px;
+        width: 300px;
+        margin-bottom: 2em;
+        font-size: 12px;
+        margin-right: 20px;
+        border: 2px dotted black;
+    }
+
+    .back-button button {
+        margin-right: 60em;
+        margin-top: 6em;
+        width: 60px;
+        height: auto;
+        display: inline-block;
+        background-color: rgb(207, 203, 203);
+    }
+
+    @media screen and (max-width:430px) {
+        .content {
+            width: 370px;
+            max-width: 90%;
+            margin: 20px auto;
+            margin-left: 20px;
+            /* text-align: left; */
+            background: #b9eaac;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button button {
+            margin: 1em;
+            margin-right: 280px;
+        }
+
+        .note {
+            border-radius: 10px;
+            width: 200px;
+            margin-bottom: 2em;
+            font-size: 12px;
+            margin-left: 20px;
+
+        }
+
+
+        .content h2 {
+            font-size: 24px;
+            /* margin-left: 100px;   */
+        }
+
+        .topic {
+            margin: 1em auto;
+            text-align: left;
+            width: 90%;
+        }
+
+        .labels {
+            font-size: 16px;
+            text-align: center;
+        }
+    }
+</style>
+
+<body style="background-color:rgb(231, 236, 223);">
+    <div class="topic">
+        <center>
+            <div class="back-button">
+                <a href="/profile">
+                    <button>Back</button>
+                </a>
+            </div>
+
+        </center>
+    </div>
+
+
+    <center style="padding-top:2em;">
+        <div class="content">
+            <h2>Edit Profile</h2><br>
+            <div class="note">
+                <p>NOTE: Only Name, Phone number, Gender field is editable</p>
+            </div>
+
+            <!-- {% if msg %}
+            <script>
+                alert("{{ msg }}");
+            </script>
+            {% endif %} -->
+
+            <form id="editfor" action="/update" method="post">
+                <div class="labels">
+                    <label>Email:</label>
+                    <input type="text" value="{{ user.email }}" readonly><br><br>
+
+                    <label>Name:</label>
+                    <input type="text" id="name" name="name" value="{{ user.name }}" required><br><br>
+
+                    <label>Phone:</label>
+                    <input type="text" id="phone" name="phone" value="{{ user.phone_number }}" required><br><br>
+
+                    <label>Gender:</label>
+                    <input type="text" id="gender" name="gender" value="{{ user.gender }}" required><br><br>
+
+                    <button type="submit">Update</button>
+                </div>
+
+            </form>
+
+            {% if msg %}
+            <p style="color: red; font-weight: bold; margin-top: 10px;">{{ msg }}</p>
+            {% endif %}
+        </div>
+
+    </center>
+
+
+    <!-- <script>
+        document.getElementById("editForm").addEventListener("submit", async function (e) {
+            e.preventDefault(); // stop refresh
+
+            const name = document.getElementById("name").value;
+            const phone = document.getElementById("phone").value;
+            const gender = document.getElementById("gender").value;
+            const msgBox = document.getElementById("update-msg");
+
+            msgBox.textContent = ""; // clear old message
+
+            try {
+                const response = await fetch("/update", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, phone, gender })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    msgBox.style.color = "green";
+                    msgBox.textContent = result.message;
+                } else {
+                    msgBox.style.color = "red";
+                    msgBox.textContent = result.message;
+                }
+            } catch (err) {
+                msgBox.style.color = "red";
+                msgBox.textContent = "Something went wrong. Try again.";
+            }
+        });
+    </script> -->
+
+
+</body>
+
+</html>

@@ -1,0 +1,240 @@
+<!-- <!DOCTYPE html>
+<html>
+
+<head>
+    <title>Welcome</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        .req {
+            color: brown;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body style="padding-top:10em;">
+    <form id="form" method="post" action="/submit" enctype="multipart/form-data">
+
+
+        <center>
+            <label for="excel" style="margin-right:60px;">Upload your file here:
+                <span class="req">*</span>
+            </label><br><br>
+            <input type="file" id="excel" name="file" accept=".xls,.xlsx,.pdf,.doc,.docx,.txt" required>
+            <h2 style="margin-right:50px;">Result is:</h2>
+            <table id="output"></table><br><br>
+            <button type="submit" id="button" style="display: none;">submit</button>
+        </center>
+    </form>
+
+    <script>
+        const input = document.getElementById("excel");
+        const output = document.getElementById("output");
+        const display = document.getElementById("button");
+        const form = document.getElementById("form");
+
+        const required_fields = ["name", "phone", "address", "email", "gender"];
+
+        input.addEventListener("change", function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (ext == "xls" || ext == "xlsx") {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const data = e.target.result;
+                    const workbook = XLSX.read(data, { type: "binary" });
+                    const sheet = workbook.SheetNames[0];
+                    let rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
+
+                    rows = rows.map(r => {
+                        let newRow = {};
+                        for (let k in r) {
+                            newRow[k.toLowerCase().trim()] = r[k];
+                        }
+                        return newRow;
+                    });
+
+                    let table = "<tr>" + required_fields.map(h => `<th>${h}</th>`).join("") + "</tr>";
+                    rows.forEach(r => {
+                        table += "<tr>" + required_fields.map(h => {
+                            if (r[h] !== undefined && r[h] !== "") {
+                                return `<td><input type="text" name="${h}[]" value="${r[h]}"></td>`;
+                            } else {
+                                return `<td><input type="text" name="${h}[]" placeholder="${h}"></td>`;
+                            }
+                        }).join("") + "</tr>";
+                    });
+                    output.innerHTML = table;
+                    display.style.display = "flex";
+                };
+                reader.readAsBinaryString(file);
+            } else {
+                output.innerHTML = "Click submit to see the content";
+                display.style.display = "flex";
+            }
+
+        });
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Welcome</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
+    <style>
+        .req {
+            color: brown;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+        }
+
+        #fileContent {
+            display: none;
+            width: 80%;
+            height: 300px;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body style="padding-top:10em;">
+    <form id="form" method="post" action="/submit" enctype="multipart/form-data">
+        <center>
+            <label for="excel" style="margin-right:60px;">Upload your file here:
+                <span class="req">*</span>
+            </label><br><br>
+            <input type="file" id="excel" name="file" accept=".xls,.xlsx,.pdf,.doc,.docx,.txt" required>
+            <h2 style="margin-right:50px;">Result is:</h2>
+            <table id="output"></table><br><br>
+            <textarea id="fileContent" name="fileContent"></textarea><br>
+            <button type="submit" id="button" style="display: none;">submit</button>
+        </center>
+    </form>
+
+
+    <script>
+        const input = document.getElementById("excel");
+        const output = document.getElementById("output");
+        const display = document.getElementById("button");
+        const fileContent = document.getElementById("fileContent");
+
+        const required_fields = ["name", "phone", "address", "email", "gender"];
+
+        input.addEventListener("change", function (e) {
+            const file = e.target.files[0];
+            if (!file) {
+                fileContent.style.display = "none";
+                output.innerHTML = "";
+                display.style.display = "none";
+                return;
+            }
+
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (ext === "xls" || ext === "xlsx") {
+                fileContent.style.display = "none";
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const data = e.target.result;
+                    const workbook = XLSX.read(data, {
+                        type: "binary"
+                    });
+                    const sheet = workbook.SheetNames[0];
+                    let rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
+
+                    rows = rows.map(r => {
+                        let newRow = {};
+                        for (let k in r) {
+                            newRow[k.toLowerCase().trim()] = r[k];
+                        }
+                        return newRow;
+                    });
+
+                    let table = "<tr>" + required_fields.map(h => `<th>${h}</th>`).join("") + "</tr>";
+                    rows.forEach(r => {
+                        table += "<tr>" + required_fields.map(h => {
+                            const value = r[h] !== undefined ? r[h] : '';
+                            return `<td><input type="text" name="${h}[]" value="${value}"></td>`;
+                        }).join("") + "</tr>";
+                    });
+                    output.innerHTML = table;
+                    display.style.display = "block";
+                };
+                reader.readAsBinaryString(file);
+            } else if (ext === "pdf") {
+                output.innerHTML = "";
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const arrayBuffer = e.target.result;
+                    pdfjsLib.getDocument({ data: arrayBuffer }).promise.then(pdf => {
+                        pdf.getPage(1).then(page => {
+                            page.getTextContent().then(content => {
+                                const text = content.items.map(item => item.str).join(" ");
+                                fileContent.value = text;
+                                fileContent.style.display = "block";
+                                display.style.display = "block";
+                            });
+                        });
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            else if (ext === "doc" || ext === "docx") {
+                output.innerHTML = "";
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const arrayBuffer = e.target.result;
+                    mammoth.extractRawText({ arrayBuffer: arrayBuffer }).then(result => {
+                        fileContent.value = result.value;
+                        fileContent.style.display = "block";
+                        display.style.display = "block";
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            else if (ext === "txt") {
+                output.innerHTML = "";
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    fileContent.value = e.target.result;
+                    fileContent.style.display = "block";
+                    display.style.display = "block";
+                };
+                reader.readAsText(file);
+            } else {
+                output.innerHTML = "Unsupported file type!";
+                fileContent.style.display = "none";
+                display.style.display = "none";
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/chat.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Chat With Friends</title>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+</head>
+
+<body>
+    <nav class="navibar">
+        <span class="menu-toggle"><i class="fa-solid fa-bars"></i></span>
+
+        <ul class="navi">
+            <li><a href="/home">HOME</a></li>
+            <li><a href="/profile">PROFILE</a></li>
+            <li>
+                <a href="/chat">
+                    CHAT
+                    {% if unread_msg_count > 0 %}
+                    <span class="dot"></span>
+                    {% endif %}
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ url_for('friends_page') }}" id="friends-link">
+                    FRIENDS
+                    {% if pending_req_count > 0 %}
+                    <span class="dot"></span>
+                    {% endif %}
+                </a>
+            </li>
+            <li><a href="/logout">LOGOUT</a></li>
+        </ul>
+
+        {% if user %}
+        <h2 class="welcome">
+            <a href="/profile" style="text-decoration:none; color:inherit;">
+                Welcome {{ user.name }} !!
+            </a>
+        </h2>
+        {% endif %}
+    </nav><br><br>
+
+
+    <div class="chat-container">
+        <div class="topic">
+            <center>
+                <p>Chat With </p>
+                <p>Your Friends!!! </p>
+
+            </center>
+        </div>
+
+
+
+        <div class="chat-list">
+            <h2>Your Friends</h2>
+            <h3 style="text-align:center;margin-bottom:20px;">Select a friend to start chat</h3>
+
+            <!-- Search bar -->
+            <!-- <input type="text" id="friendSearch" placeholder="Search friends..." class="friend-search"> -->
+
+            <input type="text" id="friendSearch" placeholder="Search friends..." class="friend-search"
+                onkeyup="searchFriends()">
+
+
+            <!-- Friends list container -->
+            <div id="friendList">
+                {% for u in users %}
+                <div class="user-item">
+                    <button onclick="openChat('{{ u.name }}', '{{ u.email }}')">
+                        {{ u.name }}
+                        {% if u.unread_count > 0 %}
+                        <span class="unread-count">{{ u.unread_count }}</span>
+                        {% endif %}
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- 
+            <button class="more" onclick="window.location.href='/home'">Add More Friend</button> -->
+        </div>
+
+
+        <div id="chat-box" style="display:none;">
+            <div class="chat-header">
+                <h3 id="chat-with"></h3>
+            </div>
+
+            <div id="messages"></div>
+            <div id="suggestion-container" style="display:none;">
+                <p style="font-size:medium; padding-top: 0.5em; color: crimson;">Suggestions to reply:</p>
+                <div id="suggestions" class="suggestions-box"></div>
+            </div>
+
+            <input type="text" id="chatmsg" placeholder="Type a message...">
+            <button id="sendBtn" onclick="sendMessage()">Send</button>
+        </div>
+
+
+        <script>
+            const socket = io();
+            let currentUserEmail = "{{ user.email }}";
+            let currentUserName = "{{ user.name }}";
+
+            let chattingWithEmail = null;
+            let chattingWithName = null;
+
+            window.addEventListener("DOMContentLoaded", () => {
+                socket.emit("register", { username: currentUserEmail });
+                console.log("User registered automatically:", currentUserEmail);
+
+                const msgInput = document.getElementById("chatmsg");
+                msgInput.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            });
+
+
+            socket.on("receive_message", (data) => {
+                console.log("New message:", data);
+            });
+
+
+            function openChat(name, email) {
+                chattingWithName = name;
+                chattingWithEmail = email;
+
+                const suggestionContainer = document.getElementById("suggestion-container");
+                const box = document.getElementById("suggestions");
+                suggestionContainer.style.display = "none";
+                box.innerHTML = "";
+
+                document.getElementById("chat-with").innerText = "Chatting with " + name;
+                document.getElementById("chat-box").style.display = "block";
+                document.getElementById("messages").innerHTML = "";
+
+
+                fetch('/mark_read', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sender_email: chattingWithEmail,
+                        receiver_email: currentUserEmail
+                    })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            let userButton = document.querySelector(`button[onclick="openChat('${name}', '${email}')"]`);
+                            if (userButton) {
+                                let unreadSpan = userButton.querySelector('.unread-count');
+                                if (unreadSpan) unreadSpan.remove();
+                            }
+                            updateNavRedDot();
+                        }
+
+                        // Load previous messages
+                        fetch(`/messages/${currentUserEmail}/${chattingWithEmail}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                let lastMsg = null;
+                                data.messages.forEach(m => {
+                                    addMessage(m.sender, m.message, m.timestamp);
+                                    lastMsg = m; // keep track of the last message
+                                });
+
+                                // 🧠 Trigger AI suggestion for last received message
+                                if (lastMsg && lastMsg.sender === chattingWithEmail) {
+                                    console.log("Fetching AI suggestions for:", lastMsg.message);
+                                    getRecommendations(lastMsg.message);
+                                }
+                            });
+                    });
+            }
+
+            function moveUserToTop(email) {
+                let friendList = document.getElementById("friendList");
+                let userItems = friendList.querySelectorAll(".user-item");
+
+                userItems.forEach(item => {
+                    let btn = item.querySelector("button");
+                    if (btn.getAttribute("onclick").includes(email)) {
+                        friendList.removeChild(item);
+                        friendList.insertBefore(item, friendList.firstChild);
+                    }
+                });
+            }
+
+
+            socket.on("private_message", function (data) {
+                if (data.sender === chattingWithEmail || data.receiver === chattingWithEmail) {
+                    addMessage(data.sender, data.message, data.timestamp);
+                }
+
+                let otherEmail = (data.sender === currentUserEmail) ? data.receiver : data.sender;
+                moveUserToTop(otherEmail);
+
+                if (data.sender === chattingWithEmail && data.sender !== currentUserEmail) {
+                    getRecommendations(data.message);
+                }
+            });
+
+
+
+
+
+            function sendMessage() {
+                const msgInput = document.getElementById("chatmsg");
+                const msg = msgInput.value.trim();
+                if (!msg || !chattingWithEmail) return;
+
+
+                const timestamp = new Date().toISOString();
+
+                const data = {
+                    sender: currentUserEmail,
+                    receiver: chattingWithEmail,
+                    message: msg,
+                    timestamp
+                };
+
+                socket.emit("private_message", data);
+
+                addMessage(data.sender, data.message, timestamp);
+                msgInput.value = "";
+                moveUserToTop(chattingWithEmail);
+                msgInput.focus();
+            }
+
+
+            function formatTimestamp(date) {
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const d = String(date.getDate()).padStart(2, '0');
+                const h = String(date.getHours()).padStart(2, '0');
+                const min = String(date.getMinutes()).padStart(2, '0');
+                return `${y}/${m}/${d} ${h}:${min}`;
+            }
+
+            function addMessage(sender, message, timestamp) {
+                let div = document.createElement("div");
+                div.classList.add("msg");
+
+                let ts = new Date(timestamp);
+                let formattedTime = formatTimestamp(ts);
+
+                if (sender === currentUserEmail) {
+                    div.classList.add("you");
+                    div.innerText = "You: " + message + " (" + formattedTime + ")";
+                } else {
+                    div.classList.add("other");
+                    div.innerText = chattingWithName + ": " + message + " (" + formattedTime + ")";
+                }
+
+                document.getElementById("messages").appendChild(div);
+                document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+            }
+
+
+
+            function updateNavRedDot() {
+                const anyUnread = Array.from(document.querySelectorAll('.unread-count')).some(span => {
+                    return parseInt(span.textContent) > 0;
+                });
+
+                let chatNavDot = document.querySelector('.navi a[href="/chat"] .dot');
+
+                if (anyUnread) {
+                    if (!chatNavDot) {
+                        let aTag = document.querySelector('.navi a[href="/chat"]');
+                        let dot = document.createElement('span');
+                        dot.classList.add('dot');
+                        aTag.appendChild(dot);
+                    }
+                } else {
+                    if (chatNavDot) chatNavDot.remove();
+                }
+            }
+
+
+
+        </script>
+
+        <script>
+            function getRecommendations(latestMsg) {
+                fetch("/chat_recommendations", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: latestMsg })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        const box = document.getElementById("suggestions");
+                        const suggestionContainer = document.getElementById("suggestion-container");
+                        box.innerHTML = "";
+
+                        if (data.suggestions && data.suggestions.length > 0) {
+                            suggestionContainer.style.display = "block";
+                            data.suggestions.forEach(text => {
+                                text = text.replace(/^\d+[\.\)]\s*/, "").replace(/['"]/g, "").trim();
+                                text = text.split(" ").slice(0, 7).join(" "); 
+
+                                let btn = document.createElement("button");
+                                btn.textContent = text;
+                                btn.classList.add("suggestion-btn");
+
+                                btn.onclick = () => {
+                                    const input = document.getElementById("chatmsg");
+                                    input.value = text;
+                                    input.focus();
+                                };
+
+                                box.appendChild(btn);
+                            });
+                        } else {
+                            suggestionContainer.style.display = "none"; 
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error getting recommendations:", err);
+                        document.getElementById("suggestion-container").style.display = "none";
+                    });
+            }
+        </script>
+
+
+
+        <script>
+            const menuToggle = document.querySelector(".menu-toggle");
+            const navMenu = document.querySelector(".navi");
+
+            menuToggle.addEventListener("click", () => {
+                navMenu.classList.toggle("show");
+            });
+
+            document.querySelectorAll(".navi a").forEach(link => {
+                link.addEventListener("click", () => {
+                    navMenu.classList.remove("show");
+                });
+            });
+        </script>
+
+
+        <!-- <script>
+            function searchFriends() {
+                const input = document.getElementById("friendSearch").value.toLowerCase().trim();
+                const users = document.querySelectorAll("#friendList .user-item");
+
+                users.forEach(user => {
+                    const text = user.textContent.toLowerCase();
+                    if (text.includes(input)) {
+                        user.style.display = "block";
+                    } else {
+                        user.style.display = "none";
+                    }
+                });
+            }
+        </script> -->
+
+
+        <script>
+            function searchFriends() {
+                const input = document.getElementById("friendSearch").value.trim();
+
+                fetch("/search_friends", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({ query: input })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        const friendList = document.getElementById("friendList");
+                        friendList.innerHTML = "";
+
+                        if (data.length === 0) {
+                            friendList.innerHTML = "<p style='text-align:center;color:gray;'>No friends found</p>";
+                            return;
+                        }
+
+                        data.forEach(u => {
+                            const div = document.createElement("div");
+                            div.classList.add("user-item");
+
+                            div.innerHTML = `
+                <button onclick="openChat('${u.name}', '${u.email}')">
+                    ${u.name}
+                </button>
+            `;
+
+                            friendList.appendChild(div);
+                        });
+                    })
+                    .catch(err => {
+                        console.error("Error searching friends:", err);
+                    });
+            }
+        </script>
+
+</body>
+
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/friends.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <title>Friends</title>
+
+</head>
+
+<body>
+    <nav class="navibar">
+
+        <ul class="navi">
+            <li><a href="/home">HOME</a></li>
+            <li><a href="/profile">PROFILE</a></li>
+            <li>
+                <a href="/chat">
+                    CHAT
+                    {% if unread_msg_count > 0 %}
+                    <span class="dot"></span>
+                    {% endif %}
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ url_for('friends_page') }}" id="friends-link">
+                    FRIENDS
+                    {% if pending_req_count > 0 %}
+                    <span class="dot"></span>
+                    {% endif %}
+                </a>
+            </li>
+
+            <li><a href="/logout">LOGOUT</a></li>
+        </ul>
+
+        {% if user %}
+        <h2 class="welcome">
+            <a href="/profile" style="text-decoration:none; color:inherit;">
+                Welcome {{ user.name }} !!
+            </a>
+        </h2>
+        {% endif %}
+    </nav><br><br>
+
+    <!-- {% if msg %}
+    <script>
+        alert("{{ msg }}");
+    </script>
+    {% endif %} -->
+
+    <!-- Send Friend Request -->
+    <div class="request-form" style="padding-top:4em; text-decoration: none;;">
+        <a href="{{ url_for('view_requests') }}" class="view-req-link">
+            View friends Requests
+            {% if pending_req_count > 0 %}
+            ({{ pending_req_count }})
+            {% endif %}
+        </a>
+
+    </div><br>
+
+
+    <!-- Add Friend by Email -->
+    <div class="frnd-email-input" style="padding-top:1em;">
+        <form method="POST" action="{{ url_for('check_and_add_friend') }}">
+            <label style="font-size: large;"><b>Add Friend Quickly by email:</b></label><br><br>
+            <input type="email" name="friend_email" placeholder="Enter email"
+                value="{{ friend_email if friend_email else '' }}" required style="padding:5px; width:250px;"><br><br>
+            <button type="submit">Check</button>
+        </form>
+
+        {% if msg %}
+        <p style="color: red; font-weight: bold; margin-top: 5px;">{{ msg }}</p>
+        {% endif %}
+
+        {% if show_add_button %}
+        <form method="POST" action="{{ url_for('send_req') }}" style="margin-top: 5px;">
+            <input type="hidden" name="friend_email" value="{{ friend_email }}">
+            <span style="margin-left:10px; font-weight:bold; color:green;">User found!</span>
+            <button type="submit">Add Friend</button>
+
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Upload File -->
+    <div class="file">
+        <form id="upload-friends-form" method="POST" action="/upload_file" enctype="multipart/form-data">
+            <h3>Upload a file to send it to your friends:</h3><br>
+            <input type="file" id="file-input" name="file" accept="image/*" required><br><br>
+            <!-- <button type="button" id="show-friends-btn">Send to ...</button> -->
+
+            <div id="friends-checkboxes">
+                <h3>Select friends to send the file personally:</h3><br>
+                {% if friends %}
+                {% for f in friends %}
+                <input type="checkbox" name="receivers" value="{{ f.friend_email }}"> {{ f.friend_email }}<br>
+                {% endfor%}<br>
+                <!-- <div class="more-frnd">
+                    <h4> Want to Add More Friends??</h4>
+                    <h3 onclick="window.location.href='/home'">Click Here!! </h3>
+                </div> -->
+
+                {% else %}
+                <h4 style="color:brown;">Your friend list is empty!!</h4>
+                <h4 style="color:brown; cursor:pointer;" onclick="window.location.href='/home'">
+                    Add anyone to your friend list first..
+                </h4>
+                {% endif %}
+            </div>
+
+            <div id="dropdown" style="margin-right:20px;">
+                <label for="time-select"><b>SELECT TIME:</b></label>
+                <select id="time-select" name="time_interval" required>
+                    <option value="" disabled selected>Select an option</option>
+                    {% for i in range(5, 61,5 ) %}
+                    <option value="{{ i }}">{{ i }} minutes</option>
+                    {% endfor %}
+                </select><br><br>
+                <button type="submit">Send File</button>
+
+                <p id="file-error-msg" style="color:red; font-weight:bold; margin-top:5px; display:none;"></p>
+            </div>
+        </form>
+    </div><br><br>
+
+    <!-- Received Files -->
+    <div class="output">
+        <center>
+            <h3>Files shared with you:</h3>
+        </center>
+    </div>
+
+    <div class="shared-container">
+        {% if files %}
+        {% for f in files %}
+        <div class="shared_card" data-time="{{ f.time_interval_in_mins }}" data-uploaded="{{ f.uploaded_at }}">
+            <p>From: {{ f.user_email }}</p>
+            <p>Sent at: {{ f.uploaded_at }}</p>
+            <p>Valid for: {{ f.time_interval_in_mins }} minutes</p>
+            {% if f.file_data %}
+            <img src="data:image/*;base64,{{ f.file_data }}" alt="Shared Image" class="shared_pic">
+            {% else %}
+            <p>No image</p>
+            {% endif %}
+
+        </div><br>
+        {% endfor %}
+        <p class="elses" style="display:none;">No files.</p>
+        {% else %}
+        <p class="elses" style="display:block;">No files.</p>
+        {% endif %}
+    </div>
+
+
+
+    <script>
+        function sendFriendRequest(email) {
+            fetch('/send_request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ friend_email: email })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success && data.message.includes('Do you want to send request again')) {
+                        // Show alert
+                        if (confirm(data.message)) {
+                            // User clicked OK -> force send
+                            fetch('/force_send_request', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ friend_email: email })
+                            })
+                                .then(res => res.json())
+                                .then(res2 => alert(res2.message));
+                        }
+                    } else {
+                        alert(data.message);
+                    }
+                });
+        }
+
+    </script>
+
+    <script>
+        function hide_cards() {
+            const cards = document.querySelectorAll(".shared_card");
+            const elses = document.querySelectorAll(".elses");
+            let card_count = cards.length;
+
+            if (card_count === 0) {
+
+                elses.forEach(els => els.style.display = "block");
+            }
+
+            cards.forEach(card => {
+                const timeMinutes = parseInt(card.dataset.time) || 0;
+                const uploadedAt = new Date(card.dataset.uploaded);
+                const expiryTime = uploadedAt.getTime() + (timeMinutes * 60000);
+                const remaining = expiryTime - Date.now();
+
+                if (remaining <= 0) {
+                    card.style.display = "none";
+                    card_count--;
+                    if (card_count === 0) {
+                        elses.forEach(els => els.style.display = "block");
+                    }
+                } else {
+                    setTimeout(() => {
+                        card.style.display = "none";
+                        alert("File expired, request your friend to reshare.");
+                        card_count--;
+                        if (card_count === 0) {
+                            elses.forEach(els => els.style.display = "block");
+                        }
+                    }, remaining);
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", hide_cards);
+
+
+        document.getElementById("upload-friends-form").addEventListener("submit", (e) => {
+            const checked = document.querySelectorAll('input[name="receivers"]:checked');
+            const errorMsg = document.getElementById("file-error-msg");
+
+            if (checked.length === 0) {
+                e.preventDefault();
+                errorMsg.textContent = "NOTE: Please select at least one friend!";
+                errorMsg.style.display = "block";
+            } else {
+                errorMsg.style.display = "none";
+            }
+        });
+    </script>
+
+    <!-- 
+    <script>
+        const menuToggle = document.querySelector(".menu-toggle");
+        const navMenu = document.querySelector(".navi");
+
+        menuToggle.addEventListener("click", () => {
+            navMenu.classList.toggle("show");
+        });
+
+        document.querySelectorAll(".navi a").forEach(link => {
+            link.addEventListener("click", () => {
+                navMenu.classList.remove("show");
+            });
+        });
+    </script> -->
+
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    {% if user %}
+    <script>
+        const socket = io();
+        const currentUserEmail = "{{ user.email }}";
+        socket.emit("register", { username: currentUserEmail });
+
+        socket.on("friends_updated", () => {
+            console.log("Friend list updated — refreshing...");
+            window.location.reload();
+        });
+    </script>
+    {% endif %}
+
+</body>
+
+
+</html>

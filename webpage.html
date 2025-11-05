@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <title>Webpage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url("/static/images/home.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            /* background-color: rgb(231, 236, 223); */
+        }
+
+        .navibar {
+            position: fixed;
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+            background-color: #79d976;
+            z-index: 1000;
+        }
+
+        .navi {
+            list-style: none;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navi li a {
+            text-decoration: none;
+            color: rgb(31, 28, 28);
+            font-weight: bold;
+            text-align: center;
+            margin-left: 20px;
+        }
+
+        .navi li a:hover {
+            color: rgb(255, 255, 255);
+        }
+
+        @media screen and (min-width:430px) and (max-width: 768px) {
+            .navibar {
+                flex-direction: row;
+                align-items: flex-start;
+                padding: 15px;
+            }
+
+            .navi {
+                flex-direction: row;
+                width: 100%;
+                /* margin-left: 160px; */
+                gap: 8px;
+            }
+
+            .navi li a {
+                margin-left: 20px;
+                font-size: 16px;
+            }
+
+            .container {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+                padding: 10px;
+            }
+
+            .card {
+                width: calc(50% - 20px);
+                max-width: 350px;
+            }
+
+            .card h3 {
+                font-size: 16px;
+            }
+
+            .card h4 {
+                font-size: 12px;
+            }
+
+            .card-footer a.friends {
+                font-size: 13px;
+                padding: 6px 12px;
+            }
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 21px;
+            cursor: pointer;
+            color: black;
+            width: 10px;
+            text-align: center;
+        }
+
+        @media screen and (max-width: 430px) {
+            .navibar {
+                justify-content: space-between;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .navi {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background-color: #79d976;
+                margin-top: 10px;
+                padding: 10px 0;
+                gap: 5px;
+            }
+
+            .navi.show {
+                display: flex;
+            }
+
+            .navi li {
+                text-align: center;
+                margin: 5px auto;
+                background-color: azure;
+                text-align: center;
+                width: 100px;
+                border-radius: 8px;
+            }
+
+            .navi li a {
+                font-size: 16px;
+                margin: 0 auto;
+            }
+        }
+
+        .container {
+            padding-top: 6em;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: rgb(202, 232, 198);
+            border: 2px solid rgb(49, 42, 34);
+            border-radius: 12px;
+            width: 258px;
+            height: auto;
+            padding: 12px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card h3 {
+            text-align: left;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .card h4 {
+            text-align: right;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: rgb(0, 0, 0);
+        }
+
+        .card img,
+        .card video {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .card p,
+        .thought {
+            font-size: 14px;
+            color: #333;
+            margin-top: 5px;
+            word-wrap: break-word;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            text-align: center;
+            padding-top: 5px;
+        }
+
+        .card-footer a.friends {
+            border-radius: 3px;
+            border: 2px solid;
+            text-decoration: none;
+            background-color: #eaeedc;
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .card-footer a.friends:hover {
+            background-color: #d4e793;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navibar">
+        <span class="menu-toggle"><i class="fa-solid fa-bars"></i></span>
+        <ul class="navi">
+            <li><a href="/">HOME</a></li>
+            <li><a href="/login">CHAT</a></li>
+            <li><a href="/login">FRIENDS</a></li>
+            <li><a href="/signup">SIGN UP</a></li>
+            <li><a href="/login">LOGIN</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        {% for c in content %}
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>{{ c.name }}</h3>
+                <h4 style="font-size:12px; color:rgb(0, 0, 0);">Uploaded at: {{ c.uploaded_at }}</h4>
+            </div>
+
+            {% if c.media_type == "image" %}
+            <img src="data:image/*;base64,{{ c.filedata }}" alt="User Image">
+
+            {% elif c.media_type == "video" %}
+            <video width="100%" height="120px;" controls>
+                <source src="data:video/mp4;base64,{{ c.filedata }}" type="video/mp4">
+            </video>
+
+            {% elif c.media_type in ["pdf", "doc", "ppt", "txt"] %}
+            <p>
+                <a href="data:application/{{ c.media_type }};base64,{{ c.filedata }}"
+                    download="document.{{ c.media_type }}"><br><br><br>
+                    DOWNLOAD THIS FILE
+                </a>
+
+
+            </p><br>
+            {% endif %}
+
+
+            <p>{{ c.thought }}</p>
+
+            <div class="card-footer">
+                <a href="/login" class="friends"
+                    style="border-radius: 3px; border:2px solid;text-decoration: none;background-color: #eaeedc;">Add
+                    to friends</a>
+                <!-- <button class="friends">Add to Friends</button> -->
+            </div>
+
+        </div>
+        {% endfor %}
+    </div><br>
+
+
+    <center>
+        <a href="/login"
+            style="display:inline-block;background-color: darkcyan;color:white;width:130px; height:auto;border-radius: 8px; text-decoration: none;">Create
+            Like This</a>
+    </center><br>
+
+
+    <script>
+        const menuToggle = document.querySelector(".menu-toggle");
+        const navMenu = document.querySelector(".navi");
+
+        menuToggle.addEventListener("click", () => {
+            navMenu.classList.toggle("show");
+        });
+
+        document.querySelectorAll(".navi a").forEach(link => {
+            link.addEventListener("click", () => {
+                navMenu.classList.remove("show");
+            });
+        });
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friend Requests</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url("/static/images/friends.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+        }
+
+        .navibar {
+            top: 0px;
+            position: fixed;
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+            background-color: #79d976;
+            z-index: 1000;
+        }
+
+        .navi {
+            list-style: none;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navi li a {
+            text-decoration: none;
+            color: rgb(31, 28, 28);
+            font-weight: bold;
+            text-align: center;
+            margin-left: 20px;
+        }
+
+        .navi li a:hover {
+            color: rgb(255, 255, 255);
+        }
+
+        .welcome {
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .request-container {
+            margin-top: 6em;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            background: #d6e1b0;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .request-cont {
+            margin-top: 3em;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            background: #d6e1b0;
+            padding: 20px;
+            border-radius: 10px;
+
+        }
+
+        .request {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #ebede8;
+            border-radius: 5px;
+        }
+
+        .request button {
+            margin-left: 5px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .accept-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .reject-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .no-requests {
+            padding-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: brown;
+        }
+
+        .dot {
+            height: 8px;
+            width: 8px;
+            background-color: red;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 1px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navibar">
+        <ul class="navi">
+            <li><a href="/home">HOME</a></li>
+            <li><a href="/profile">PROFILE</a></li>
+            <li>
+                <a href="/chat">
+                    CHAT
+                    {% if unread_msg_count > 0 %}
+                    <span class="dot"></span>
+                    {% endif %}
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ url_for('friends_page') }}" id="friends-link">
+                    FRIENDS
+                    {% if pending_req_count > 0 %}
+                    <span class="dot"></span>
+                    {% endif %}
+                </a>
+            </li>
+            <li><a href="/logout">LOGOUT</a></li>
+        </ul>
+        {% if user %}
+        <h2 class="welcome">
+            <a href="/profile" style="text-decoration:none; color:inherit;">
+                Welcome {{ user.name }} !!
+            </a>
+        </h2>
+        {% endif %}
+    </nav><br><br>
+
+    <!-- 🔹 Friend Requests section -->
+    <div class="request-container">
+        <h3>Request Received ({{ requests|length }})</h3><br>
+        {% if requests %}
+        {% for req in requests %}
+        <div class="request">
+            <span>{{ req.sender_email }}</span>
+            <div style="display: inline-flex; gap: 5px;">
+                <a href="{{ url_for('respond_request', req_id=req.id, action='accept') }}">
+                    <button type="button" class="accept-btn">Accept</button>
+                </a>
+                <a href="{{ url_for('respond_request', req_id=req.id, action='reject') }}">
+                    <button type="button" class="reject-btn">Reject</button>
+                </a>
+            </div>
+
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="no-requests">No pending requests!</p>
+        {% endif %}
+    </div>
+
+    <!-- Sent Friend Requests section -->
+    <!-- <div class="request-container" style="margin-top:2em;">
+        <h3>Requests Sent ({{ sent_requests|length }})</h3><br>
+        {% if sent_requests %}
+        {% for req in sent_requests %}
+        <div class="request">
+            <span>{{ req.receiver_email }}</span>
+            <span style="font-weight:bold; text-transform: capitalize;">
+                {{ req.status }}
+            </span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="no-requests">No requests sent yet!</p>
+        {% endif %}
+    </div> -->
+
+
+    <!--  Friends list section -->
+    <!-- <div class="request-container" style="margin-top:2em;">
+        <h3>Your Friends ({{ friends|length }})</h3><br>
+        {% if friends %}
+        {% for friend in friends %}
+        <div class="request">
+            <span>{{ friend }}</span>
+            <form method="POST" action="{{ url_for('unfriend', friend_email=friend) }}" style="display:inline;"
+                onsubmit="return confirm('Are you sure you want to unfriend {{ friend }}?');">
+                <button type="submit" class="reject-btn">Unfriend</button>
+            </form>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="no-requests">No friends yet!!</p>
+        {% endif %}
+    </div> -->
+
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; max-width: 1200px; margin-left: auto; margin-right: auto;">
+
+        <!-- Left Box: Sent Requests -->
+        <div class="request-cont" style="flex: 1; min-width: 300px;">
+            <h3>Requests Sent ({{ sent_requests|length }})</h3><br>
+            {% if sent_requests %}
+            {% for req in sent_requests %}
+            <div class="request">
+                <span>{{ req.receiver_email }}</span>
+                <span style="font-weight:bold; text-transform: capitalize;">
+                    {{ req.status }}
+                </span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="no-requests">No requests sent yet!</p>
+            {% endif %}
+        </div>
+
+        <div class="request-cont" style="flex: 1; min-width: 300px;">
+            <h3>Unfollwed({{ unfriended_notifications|length }})</h3><br>
+            {% if unfriended_notifications %}
+            {% for note in unfriended_notifications %}
+            <div class="request" style="color: red; font-weight: bold;">
+                <span>{{ note.sender_email }}</span>
+                <span>unfriended you</span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="no-requests">No one unfriended you yet</p>
+            {% endif %}
+        </div>
+
+        <div class="request-cont" style="flex: 1; min-width: 300px;">
+            <h3>Unfriended ({{ my_unfriend_actions|length }})</h3><br>
+            {% if my_unfriend_actions %}
+            {% for note in my_unfriend_actions %}
+            <div class="request" style="color: rgb(255, 0, 0); font-weight: bold;">
+                <span>{{ note.receiver_email }}</span>
+                <span>You unfriended</span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="no-requests">You haven't unfriended anyone yet.</p>
+            {% endif %}
+        </div>
+
+
+        <!-- Right Box: Your Friends -->
+        <div class="request-cont" style="flex: 1; min-width: 300px; margin-bottom: 2em;">
+            <h3>Your Friends ({{ friends|length }})</h3><br>
+            {% if friends %}
+            {% for friend in friends %}
+            <div class="request">
+                <span>{{ friend }}</span>
+                <form method="POST" action="{{ url_for('unfriend', friend_email=friend) }}" style="display:inline;"
+                    onsubmit="return confirm('Are you sure you want to unfriend {{ friend }}?');">
+                    <button type="submit" class="reject-btn">Unfriend</button>
+                </form>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="no-requests">No friends yet!!</p>
+            {% endif %}
+        </div>
+
+        <div class="request-cont" style="flex: 1; min-width: 300px; margin-bottom: 2em;">
+            <h3>Friend Suggestions ({{ suggestions|length }})</h3><br>
+            {% if suggestions %}
+            {% for s in suggestions %}
+            <div class="request">
+                <div>
+                    <span>{{ s.email }}</span><br>
+                    <small style="color: gray;">
+                        Friend of {{ s.mutual_friends | join(', ') }}
+                    </small>
+                </div>
+                <form method="POST" action="{{ url_for('send_req') }}">
+                    <input type="hidden" name="friend_email" value="{{ s.email }}">
+                    <button type="submit" class="accept-btn">Add Friend</button>
+                </form>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="no-requests">No friend suggestions yet.</p>
+            {% endif %}
+        </div>
+
+
+    </div>
+
+    <!-- <script>
+        const menuToggle = document.querySelector(".menu-toggle");
+        const navMenu = document.querySelector(".navi");
+
+        menuToggle.addEventListener("click", () => {
+            navMenu.classList.toggle("show");
+        });
+
+        document.querySelectorAll(".navi a").forEach(link => {
+            link.addEventListener("click", () => {
+                navMenu.classList.remove("show");
+            });
+        });
+    </script> -->
+</body>
+
+</html>
