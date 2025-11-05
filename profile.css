@@ -1,0 +1,338 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.dot {
+    height: 10px;
+    width: 10px;
+    background-color: red;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 4px;
+}
+
+body {
+    background-image: url("/static/images/profile.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    height: 100%;
+    /* background-color: rgb(231, 236, 223); */
+}
+
+.navibar {
+    position: fixed;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px;
+    background-color: #79d976;
+    z-index: 1000;
+}
+
+.navi {
+    list-style: none;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+}
+
+.navi li a {
+    text-decoration: none;
+    color: rgb(31, 28, 28);
+    font-weight: bold;
+    text-align: center;
+    margin-left: 20px;
+}
+
+.navi li a:hover {
+    color: rgb(255, 255, 255);
+}
+
+h2 {
+    margin-top: 4em;
+    text-align: center;
+    font-size: 22px;
+}
+
+table {
+    width: 80%;
+    margin: 2em auto;
+    border: 2px dashed black;
+    border-collapse: collapse;
+    background: rgb(211, 244, 211);
+    box-shadow: 1px 1px 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+th {
+    background: #9af496;
+}
+
+.btn {
+    padding: 6px 12px;
+    border: black;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.edit,
+.add {
+    background: #fbc531;
+    color: black;
+}
+
+.delete {
+    background: #e84118;
+    color: white;
+}
+
+.container {
+    padding: 2em 1em;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.card {
+    background-color: rgb(202, 232, 198);
+    border: 2px solid black;
+    border-radius: 12px;
+    width: 260px;
+    padding: 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.card h3 {
+    text-align: left;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.card h4 {
+    text-align: right;
+    font-size: 10px;
+    margin-bottom: 5px;
+    color: rgb(0, 0, 0);
+}
+
+.card img,
+.card video {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 14px;
+    color: #333;
+    margin-top: 5px;
+    word-wrap: break-word;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.welcome {
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+@media screen and (min-width:430px) and (max-width: 2560px) {
+    .navibar {
+        flex-direction: row;
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .navi {
+        flex-direction: row;
+        width: 100%;
+        /* margin-left: 160px; */
+        gap: 8px;
+    }
+
+    .navi li a {
+        margin-left: 20px;
+        font-size: 14px;
+    }
+
+
+    table {
+        width: 85%;
+        font-size: 13px;
+    }
+
+    .btn {
+        padding: 5px 10px;
+        border: 2px solid black;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    .edit,
+    .add {
+        background: #fbc531;
+        color: black;
+        margin-bottom: 4px;
+    }
+
+    .delete {
+        background: #e84118;
+        color: white;
+    }
+
+    .card {
+        width: calc(50% - 20px);
+        max-width: 300px;
+    }
+
+    .card h3 {
+        text-align: left;
+        font-weight: bold;
+        font-size: 20px;
+        margin-bottom: 5px;
+    }
+
+    .card h4 {
+        text-align: right;
+        font-size: 8px;
+        margin-bottom: 5px;
+        color: rgb(0, 0, 0);
+    }
+
+    th,
+    td {
+        border: 1px solid #000000;
+        padding: 10px;
+        text-align: center;
+        font-size: 18px;
+    }
+
+
+}
+
+.menu-toggle {
+    display: none;
+    font-size: 21px;
+    cursor: pointer;
+    color: black;
+    width: 10px;
+    text-align: center;
+}
+
+@media screen and (min-width:320px) and (max-width: 430px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .navi.show {
+        display: flex;
+    }
+
+    .navibar {
+        justify-content: space-between;
+    }
+
+    .navi {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background-color: #79d976;
+        margin-top: 10px;
+        padding: 10px 0;
+        gap: 5px;
+    }
+
+    .navi li {
+        text-align: center;
+        margin: 5px auto;
+        background-color: azure;
+        text-align: center;
+        width: 100px;
+        border-radius: 8px;
+    }
+
+    .navi li a {
+        font-size: 16px;
+        margin: 0 auto;
+    }
+
+
+    h2 {
+        margin-top: 2em;
+        text-align: center;
+        font-size: 22px;
+    }
+
+    table {
+        max-width: 40%;
+        margin: 20px auto;
+        font-size: 11px;
+    }
+
+    .btn {
+        padding: 1px 6px;
+        border: 2px solid black;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 10px;
+    }
+
+    .edit,
+    .add {
+        background: #fbc531;
+        color: black;
+        margin-bottom: 4px;
+    }
+
+    .delete {
+        background: #e84118;
+        color: white;
+    }
+
+    .card {
+        width: 220px;
+        /* max-width: 200px; */
+    }
+
+    .card h3 {
+        text-align: left;
+        font-weight: bold;
+        font-size: 20px;
+        margin-bottom: 5px;
+    }
+
+    .card h4 {
+        text-align: right;
+        font-size: 8px;
+        margin-bottom: 5px;
+        color: rgb(0, 0, 0);
+    }
+
+    th,
+    td {
+        border: 1px solid #000000;
+        padding: 5px;
+        text-align: center;
+        font-size: 10px;
+    }
+}

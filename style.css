@@ -1,0 +1,38 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.navibar {
+    position: fixed;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 50px 40px 20px 30px;
+    background-color: #dae6af;
+}
+
+
+.navi {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+    margin-left: 35em;
+
+}
+
+.navi li a {
+    text-decoration: none;
+    color: rgb(31, 28, 28);
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+h2 {
+    padding-top: 10em;
+}
+
+body {
+    background-color: rgb(244, 243, 243);
+}
