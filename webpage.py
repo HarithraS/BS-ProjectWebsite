@@ -25,7 +25,6 @@ socketio = SocketIO(app)
 
 
 # ---------- Config ----------
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:sivakumar123@localhost:3306/data"
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:MyPassword@localhost:3306/mydatabase'
 
 app.config["JWT_SECRET_KEY"] = "secret123"
@@ -1036,4 +1035,5 @@ if __name__=="__main__":
 
 # if __name__ == "__main__":
 #     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
