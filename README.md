@@ -6,12 +6,12 @@ A full-featured social & chat web application built with Flask, enabling user au
 This project implements a social networking style system where users can:
 - Home page shows users whoever uploaded their file with date & time for everyone with "add to friend" button individually
 - Sign up, log in, logout (JWT-based authentication)  
-- Create and manage friendships (send/accept/reject friend requests)  
-- View and manage their friends list  
-- Unfriend other users and receive notifications  
+- Create friendships (send/accept/reject friend requests)  
+- View and manage their friends list with detailed info of accepted/rejected 
+- Unfriend other users and receive notifications when they unfriended you  
 - Receive “friend suggestions” based on friends-of-friends mutual connections  
 - Chat with friends (basic UI/UX for chat conversations)
-- Send any type of file to friends with a selected time-limited and download window
+- Send any type of file to friends with a selected time-limited and option for download window
 - View, delete and edit their profile 
 
 ## Key Features  
